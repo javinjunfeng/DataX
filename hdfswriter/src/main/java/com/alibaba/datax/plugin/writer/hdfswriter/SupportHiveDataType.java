@@ -7,7 +7,8 @@ public enum SupportHiveDataType {
     BIGINT,
     FLOAT,
     DOUBLE,
-
+    //添加 DECIMAL 格式
+    DECIMAL,
     TIMESTAMP,
     DATE,
 
