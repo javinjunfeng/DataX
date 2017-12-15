@@ -454,6 +454,10 @@ public  class HdfsHelper {
                 case DECIMAL:
                     objectInspector = ObjectInspectorFactory.getReflectionObjectInspector(BigDecimal.class, ObjectInspectorFactory.ObjectInspectorOptions.JAVA);
                     break;
+                //添加 BINARY 格式
+                case BINARY:
+                    objectInspector = ObjectInspectorFactory.getReflectionObjectInspector(byte[].class, ObjectInspectorFactory.ObjectInspectorOptions.JAVA);
+                    break;
                 default:
                     throw DataXException
                             .asDataXException(
@@ -538,6 +542,11 @@ public  class HdfsHelper {
                                 break;
                                 //添加 DECIMAL 格式
                             case DECIMAL:
+                                recordList.add(column.asBigDecimal());
+                                break;
+                                //添加 BINARY 格式
+                            case BINARY:
+                                recordList.add(column.asBytes());
                                 break;
                             default:
                                 throw DataXException
