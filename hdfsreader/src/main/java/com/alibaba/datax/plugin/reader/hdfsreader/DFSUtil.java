@@ -56,6 +56,10 @@ public class DFSUtil {
     public static final String HDFS_DEFAULTFS_KEY = "fs.defaultFS";
     public static final String HADOOP_SECURITY_AUTHENTICATION_KEY = "hadoop.security.authentication";
 
+    //十六进制转换byte 数组
+    private static byte charToByte(char c) {
+        return (byte) "0123456789ABCDEF".indexOf(c);
+    }
 
     public DFSUtil(Configuration taskConfig) {
         hadoopConf = new org.apache.hadoop.conf.Configuration();
@@ -429,6 +433,30 @@ public class DFSUtil {
                             }
 
                             break;
+                        //添加 BINARY 支持
+                        case BINARY:
+                            try {
+                                String input = columnValue;
+                                if (null == input || input.trim().equals("")){
+                                    columnGenerated = new BytesColumn(null);
+                                }
+                                else {
+                                    char[] cs = input.toUpperCase().toCharArray();
+                                    int length = (input.length() + 1) / 3;
+                                    byte[] d = new byte[length];
+                                    for (int i = 0; i < length; i++) {
+                                        int pos = i * 3;
+                                        d[i] = (byte) (charToByte(cs[pos]) << 4 | charToByte(cs[pos + 1]));
+                                    }
+                                    columnGenerated = new BytesColumn(d);
+                                }
+                            } catch (Exception e) {
+                                throw new IllegalArgumentException(String.format(
+                                        "类型转换错误, 无法将[%s] 转换为[%s]", columnValue,
+                                        "BINARY"));
+                            }
+                            break;
+
                         case DATE:
                             try {
                                 if (columnValue == null) {
@@ -518,7 +546,7 @@ public class DFSUtil {
     }
 
     private enum Type {
-        STRING, LONG, BOOLEAN, DOUBLE, DATE,
+        STRING, LONG, BOOLEAN, DOUBLE, DATE,BINARY,
     }
 
     public boolean checkHdfsFileType(String filepath, String specifiedFileType) {
