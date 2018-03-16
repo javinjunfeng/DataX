@@ -9,6 +9,7 @@ import org.apache.commons.lang3.Validate;
 import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.TableName;
 import org.apache.hadoop.hbase.client.*;
+import org.apache.hadoop.security.UserGroupInformation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,11 +41,19 @@ public class Hbase11xHelper {
         return hConfiguration;
     }
 
+    /**
+     * 获取hbase连接
+     * @param hbaseConfig
+     * @return
+     */
     public static org.apache.hadoop.hbase.client.Connection getHbaseConnection(String hbaseConfig) {
         org.apache.hadoop.conf.Configuration hConfiguration = Hbase11xHelper.getHbaseConfiguration(hbaseConfig);
 
         org.apache.hadoop.hbase.client.Connection hConnection = null;
+
         try {
+            // 添加hbase kerberos认证
+            kerberosAuthentication(hConfiguration);
             hConnection = ConnectionFactory.createConnection(hConfiguration);
 
         } catch (Exception e) {
@@ -54,6 +63,28 @@ public class Hbase11xHelper {
         return hConnection;
     }
 
+    /**
+     * 读取配置文件，获取hbase kerberos认证
+     * @param hConfiguration
+     */
+    private static void kerberosAuthentication(org.apache.hadoop.conf.Configuration hConfiguration){
+        Boolean haveKerberos = hConfiguration.getBoolean(Key.HAVE_KERBEROS, false);
+        if (haveKerberos){
+            String kerberosKeytabFilePath = hConfiguration.get(Key.KERBEROS_KEYTAB_FILE_PATH);
+            String kerberosPrincipal = hConfiguration.get(Key.KERBEROS_PRINCIPAL);
+            if(StringUtils.isNotBlank(kerberosPrincipal) && StringUtils.isNotBlank(kerberosKeytabFilePath)){
+                UserGroupInformation.setConfiguration(hConfiguration);
+                try {
+                    UserGroupInformation.loginUserFromKeytab(kerberosPrincipal,kerberosKeytabFilePath);
+                } catch (IOException e) {
+                    String message = String.format("kerberos认证失败,请确定kerberosKeytabFilePath[%s]和kerberosPrincipal[%s]填写正确",
+                            kerberosKeytabFilePath, kerberosPrincipal);
+                    LOG.error(message);
+                    throw DataXException.asDataXException(Hbase11xWriterErrorCode.KERBEROS_LOGIN_ERROR, e);
+                }
+            }
+        }
+    }
 
     public static Table getTable(com.alibaba.datax.common.util.Configuration configuration){
         String hbaseConfig = configuration.getString(Key.HBASE_CONFIG);

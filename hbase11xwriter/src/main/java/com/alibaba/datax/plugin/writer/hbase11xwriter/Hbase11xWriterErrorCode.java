@@ -21,6 +21,7 @@ public enum Hbase11xWriterErrorCode implements ErrorCode {
     CONSTRUCT_VERSION_ERROR("Hbasewriter-11", "构建version时发生异常."),
     GET_HBASE_BUFFEREDMUTATOR_ERROR("Hbasewriter-12", "获取hbase BufferedMutator 时出错."),
     CLOSE_HBASE_BUFFEREDMUTATOR_ERROR("Hbasewriter-13", "关闭 Hbase BufferedMutator时出错."),
+    KERBEROS_LOGIN_ERROR("Hbasewriter-14", "KERBEROS认证失败"),
     ;
     private final String code;
     private final String description;
