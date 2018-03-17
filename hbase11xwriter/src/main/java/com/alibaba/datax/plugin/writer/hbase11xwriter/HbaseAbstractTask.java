@@ -157,6 +157,13 @@ public abstract class HbaseAbstractTask {
                 case BOOLEAN:
                     bytes = Bytes.toBytes(Boolean.parseBoolean(value));
                     break;
+                // 添加 BINARY、BLOB、LONGBLOB、GEOMETRY 字段支持
+                case BINARY:
+                case BLOB:
+                case LONGBLOB:
+                case GEOMETRY:
+                    bytes = Bytes.toBytes(value);
+                    break;
                 case STRING:
                     bytes = value.getBytes(Charset.forName(encoding));
                     break;
