@@ -12,6 +12,7 @@ import org.apache.hadoop.hbase.TableName;
 import org.apache.hadoop.hbase.client.*;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.hadoop.hbase.util.Pair;
+import org.apache.hadoop.security.UserGroupInformation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,6 +49,8 @@ public class Hbase11xHelper {
         }
         org.apache.hadoop.hbase.client.Connection hConnection = null;
         try {
+            // 添加hbase kerberos认证
+            kerberosAuthentication(hConfiguration);
             hConnection = ConnectionFactory.createConnection(hConfiguration);
 
         } catch (Exception e) {
@@ -55,6 +58,29 @@ public class Hbase11xHelper {
             throw DataXException.asDataXException(Hbase11xReaderErrorCode.GET_HBASE_CONNECTION_ERROR, e);
         }
         return hConnection;
+    }
+
+    /**
+     * 读取配置文件，获取hbase kerberos认证
+     * @param hConfiguration
+     */
+    private static void kerberosAuthentication(org.apache.hadoop.conf.Configuration hConfiguration){
+        Boolean haveKerberos = hConfiguration.getBoolean(Key.HAVE_KERBEROS, false);
+        if (haveKerberos){
+            String kerberosKeytabFilePath = hConfiguration.get(Key.KERBEROS_KEYTAB_FILE_PATH);
+            String kerberosPrincipal = hConfiguration.get(Key.KERBEROS_PRINCIPAL);
+            if(StringUtils.isNotBlank(kerberosPrincipal) && StringUtils.isNotBlank(kerberosKeytabFilePath)){
+                UserGroupInformation.setConfiguration(hConfiguration);
+                try {
+                    UserGroupInformation.loginUserFromKeytab(kerberosPrincipal,kerberosKeytabFilePath);
+                } catch (IOException e) {
+                    String message = String.format("kerberos认证失败,请确定kerberosKeytabFilePath[%s]和kerberosPrincipal[%s]填写正确",
+                            kerberosKeytabFilePath, kerberosPrincipal);
+                    LOG.error(message);
+                    throw DataXException.asDataXException(Hbase11xReaderErrorCode.KERBEROS_LOGIN_ERROR, e);
+                }
+            }
+        }
     }
 
 

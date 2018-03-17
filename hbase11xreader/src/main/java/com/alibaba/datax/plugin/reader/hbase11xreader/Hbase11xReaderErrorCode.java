@@ -16,7 +16,8 @@ public enum Hbase11xReaderErrorCode implements ErrorCode {
     CLOSE_HBASE_CONNECTION_ERROR("HbaseReader-07", "关闭Hbase连接时出错."),
     CLOSE_HBASE_TABLE_ERROR("HbaseReader-08", "关闭Hbase 抽取表时出错."),
     CLOSE_HBASE_REGINLOCTOR_ERROR("HbaseReader-09", "关闭 Hbase RegionLocator时出错."),
-    CLOSE_HBASE_ADMIN_ERROR("HbaseReader-10", "关闭 Hbase admin时出错.")
+    CLOSE_HBASE_ADMIN_ERROR("HbaseReader-10", "关闭 Hbase admin时出错."),
+    KERBEROS_LOGIN_ERROR("Hbasewriter-11", "KERBEROS认证失败")
     ;
 
     private final String code;
