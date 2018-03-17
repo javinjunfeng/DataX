@@ -15,6 +15,11 @@ public enum ColumnType {
     INT("int"),
     LONG("long"),
     FLOAT("float"),
+    // 添加 BINARY、BLOB、LONGBLOB、GEOMETRY 字段支持
+    BINARY("binary"),
+    BLOB("blob"),
+    LONGBLOB("longblob"),
+    GEOMETRY("geometry"),
     DOUBLE("double")
     ;
 
