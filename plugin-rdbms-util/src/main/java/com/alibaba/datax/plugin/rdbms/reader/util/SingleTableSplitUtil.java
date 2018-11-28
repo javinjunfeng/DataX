@@ -276,18 +276,36 @@ public class SingleTableSplitUtil {
         return genPKSql(splitPK,table,where);
     }
 
+//    public static String genPKSql(String splitPK, String table, String where){
+//
+//        String minMaxTemplate = "SELECT MIN(%s),MAX(%s) FROM %s";
+//        String pkRangeSQL = String.format(minMaxTemplate, splitPK, splitPK,
+//                table);
+//        if (StringUtils.isNotBlank(where)) {
+//            pkRangeSQL = String.format("%s WHERE (%s AND %s IS NOT NULL)",
+//                    pkRangeSQL, where, splitPK);
+//        }
+//        return pkRangeSQL;
+//    }
+
+    /**
+     * 修改查询最大最小分区字段值
+     * @param splitPK
+     * @param table
+     * @param where
+     * @return
+     */
     public static String genPKSql(String splitPK, String table, String where){
 
-        String minMaxTemplate = "SELECT MIN(%s),MAX(%s) FROM %s";
-        String pkRangeSQL = String.format(minMaxTemplate, splitPK, splitPK,
-                table);
+        String minMaxTemplate = "select (select %s from %s order by %s asc LIMIT 1) as minPK,(select %s from %s ORDER BY %s desc limit 1) as maxPK";
+        String pkRangeSQL = String.format(minMaxTemplate, splitPK, table, splitPK, splitPK, table, splitPK);
         if (StringUtils.isNotBlank(where)) {
-            pkRangeSQL = String.format("%s WHERE (%s AND %s IS NOT NULL)",
-                    pkRangeSQL, where, splitPK);
+            minMaxTemplate = "select (select %s from %s  WHERE (%s AND %s IS NOT NULL) order by %s asc LIMIT 1) as minPK," +
+                    "(select %s from %s WHERE (%s AND %s IS NOT NULL) ORDER BY %s desc limit 1) as maxPK";
+            pkRangeSQL = String.format(minMaxTemplate, splitPK, table, where, splitPK, splitPK, splitPK, table, where, splitPK, splitPK);
         }
         return pkRangeSQL;
     }
-    
     /**
      * support Number and String split
      * */
@@ -386,5 +404,10 @@ public class SingleTableSplitUtil {
             }
         }
         return rangeSql;
+    }
+
+    public static void main(String[] args) {
+        String s = genPKSql("tongID", "sj_lkyw_gps", "tong_time > '2018-08-08'");
+        System.out.println(s);
     }
 }
