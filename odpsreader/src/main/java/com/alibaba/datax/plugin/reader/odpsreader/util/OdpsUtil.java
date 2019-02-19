@@ -181,6 +181,10 @@ public final class OdpsUtil {
         List<Pair<String, ColumnType>> parsededColumns = new ArrayList<Pair<String, ColumnType>>();
         // warn: upper & lower case
         for (String column : userConfiguredColumns) {
+            // 添加odps字段检查时"`"号处理
+            if (column.startsWith("`") && column.endsWith("`")){
+                column = column.replace("`","");
+            }
             MutablePair<String, ColumnType> pair = new MutablePair<String, ColumnType>();
             
             // if constant column
