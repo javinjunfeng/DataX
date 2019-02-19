@@ -205,6 +205,11 @@ public class OdpsWriter extends Writer {
                 //检查列是否重复，大小写不敏感（所有写入，都是不允许写入段的列重复的）
                 ListUtil.makeSureNoValueDuplicate(userConfiguredColumns, false);
 
+                // 检查列是否存在前，需将配置字段上的"`"号去除进行判断
+                for (int i = 0; i < userConfiguredColumns.size(); i++){
+                    userConfiguredColumns.set(i,userConfiguredColumns.get(i).replace("`",""));
+                }
+
                 //检查列是否存在，大小写不敏感
                 ListUtil.makeSureBInA(allColumns, userConfiguredColumns, false);
             }
