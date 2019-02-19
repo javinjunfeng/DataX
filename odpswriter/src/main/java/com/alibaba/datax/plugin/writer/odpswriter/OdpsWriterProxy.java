@@ -5,10 +5,10 @@ import com.alibaba.datax.common.exception.DataXException;
 import com.alibaba.datax.common.plugin.TaskPluginCollector;
 import com.alibaba.datax.plugin.writer.odpswriter.util.OdpsUtil;
 
-import com.alibaba.fastjson.JSON;
 import com.aliyun.odps.OdpsType;
 import com.aliyun.odps.TableSchema;
 
+import com.aliyun.odps.data.Binary;
 import com.aliyun.odps.data.Record;
 
 import com.aliyun.odps.tunnel.TableTunnel;
@@ -171,6 +171,11 @@ public class OdpsWriterProxy {
                         if(columnStr != null && columnStr.indexOf(".") >= 36) {
                             throw new Exception("Odps decimal 类型的整数位个数不能超过35");
                         }
+                        break;
+                    case BINARY:
+                        Binary binary = new Binary(columnValue.asBytes());
+                        odpsRecord.set(currentIndex, binary);
+                        break;
                     default:
                         break;
                 }

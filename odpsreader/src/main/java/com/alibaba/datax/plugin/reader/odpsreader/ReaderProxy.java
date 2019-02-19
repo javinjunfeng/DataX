@@ -267,6 +267,14 @@ public class ReaderProxy {
             }
             break;
         }
+
+        // 添加二进制字段binary支持
+        case BINARY: {
+            dataXRecord.addColumn(new BytesColumn(odpsRecord.getBytes(columnNameValue)));
+            break;
+        }
+
+
         default:
             throw DataXException
                     .asDataXException(
